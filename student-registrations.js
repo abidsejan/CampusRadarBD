@@ -2,43 +2,32 @@
 
 let rows = document.querySelectorAll("#regTable tbody tr");
 
-function getCell(row, number) {
-    return row.querySelector("td:nth-child(" + number + ")").textContent.trim();
-}
-
-// type = "past" shows only Completed rows, anything else shows all rows
-function showRows(type) {
-    let count = 0;
-
-    rows.forEach(function(row) {
-        let show = true;
-
-        if (type === "past" && getCell(row, 3) !== "Completed") {
-            show = false;
-        }
-
-        if (show) {
-            row.style.display = "";
-            count++;
-        } else {
-            row.style.display = "none";
-        }
-        row.classList.toggle("shade", show && count % 2 === 0);
-    });
-}
-
+// Upcoming tab: show every row
 function showUpcoming(event) {
     event.preventDefault();
     document.getElementById("tabUpcoming").classList.toggle("on", true);
     document.getElementById("tabPast").classList.toggle("on", false);
-    showRows("upcoming");
+
+    for (let i = 0; i < rows.length; i++) {
+        rows[i].style.display = "";
+    }
 }
 
+// Past tab: show only the Completed rows
 function showPast(event) {
     event.preventDefault();
     document.getElementById("tabUpcoming").classList.toggle("on", false);
     document.getElementById("tabPast").classList.toggle("on", true);
-    showRows("past");
+
+    for (let i = 0; i < rows.length; i++) {
+        let status = rows[i].querySelectorAll("td")[2].textContent.trim();
+
+        if (status === "Completed") {
+            rows[i].style.display = "";
+        } else {
+            rows[i].style.display = "none";
+        }
+    }
 }
 
 function downloadData() {
@@ -46,12 +35,13 @@ function downloadData() {
 }
 
 // View link: show the details of that row
-rows.forEach(function(row) {
-    row.querySelector("a").addEventListener("click", function(event) {
+for (let i = 0; i < rows.length; i++) {
+    rows[i].querySelector("a").addEventListener("click", function(event) {
         event.preventDefault();
-        alert("Event: " + getCell(row, 1) + "\nParticipation: " + getCell(row, 2) + "\nStatus: " + getCell(row, 3) + "\nDate: " + getCell(row, 4));
+        let cells = rows[i].querySelectorAll("td");
+        alert("Event: " + cells[0].textContent + "\nParticipation: " + cells[1].textContent + "\nStatus: " + cells[2].textContent + "\nDate: " + cells[3].textContent);
     });
-});
+}
 
 document.getElementById("tabUpcoming").addEventListener("click", showUpcoming);
 document.getElementById("tabPast").addEventListener("click", showPast);

@@ -2,10 +2,10 @@
 
 let links = document.querySelectorAll("#topNav a");
 
-links.forEach(function(link) {
-    link.addEventListener("click", function() {
-        links.forEach(function(item) {
-            item.classList.toggle("active", item === link);
-        });
+for (let i = 0; i < links.length; i++) {
+    links[i].addEventListener("click", function() {
+        for (let j = 0; j < links.length; j++) {
+            links[j].classList.toggle("active", i === j);
+        }
     });
-});
+}
