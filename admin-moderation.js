@@ -1,77 +1,59 @@
 // Event moderation: search, filter, sort and approve events
 
-let tbody = document.getElementById("queueTable").querySelector("tbody");
-
-function getCell(row, number) {
-    return row.querySelector("td:nth-child(" + number + ")").textContent.trim();
-}
+let rows = document.querySelectorAll("#queueTable tbody tr");
+let tbody = document.querySelector("#queueTable tbody");
 
 // the first option "Status: Pending review" shows the whole queue
-function filterTable() {
+function filterTable(event) {
+    event.preventDefault();
+
     let search = document.getElementById("q").value.trim().toLowerCase();
     let status = document.getElementById("status").value;
-    let rows = document.querySelectorAll("#queueTable tbody tr");
-    let count = 0;
 
-    rows.forEach(function(row) {
-        let text = row.textContent.toLowerCase();
+    for (let i = 0; i < rows.length; i++) {
+        let text = rows[i].textContent.toLowerCase();
+        let rowStatus = rows[i].querySelectorAll("td")[2].textContent.trim();
         let show = true;
 
         if (!text.includes(search)) {
             show = false;
         }
-        if (status !== "Status: Pending review" && getCell(row, 3) !== status) {
+        if (status !== "Status: Pending review" && rowStatus !== status) {
             show = false;
         }
 
         if (show) {
-            row.style.display = "";
-            count++;
+            rows[i].style.display = "";
         } else {
-            row.style.display = "none";
+            rows[i].style.display = "none";
         }
-        row.classList.toggle("shade", show && count % 2 === 0);
-    });
+    }
 }
 
-// Sort: the table starts newest first, so "oldest" flips the rows
-let flipped = false;
-
+// Sort: the table starts newest first, "oldest" shows the rows in the opposite order
 function sortTable() {
-    let oldestFirst = document.getElementById("sort").value === "Sort by oldest";
+    let oldest = document.getElementById("sort").value === "Sort by oldest";
 
-    if (oldestFirst !== flipped) {
-        let rows = document.querySelectorAll("#queueTable tbody tr");
-
-        for (let i = rows.length - 1; i >= 0; i--) {
+    for (let i = 0; i < rows.length; i++) {
+        if (oldest) {
+            tbody.appendChild(rows[rows.length - 1 - i]);
+        } else {
             tbody.appendChild(rows[i]);
         }
-        flipped = oldestFirst;
     }
-    filterTable();
-}
-
-function searchQueue(event) {
-    event.preventDefault();
-    filterTable();
 }
 
 // Review link: approve that event
-document.querySelectorAll("#queueTable tbody tr").forEach(function(row) {
-    row.querySelector("a").addEventListener("click", function(event) {
+for (let i = 0; i < rows.length; i++) {
+    rows[i].querySelector("a").addEventListener("click", function(event) {
         event.preventDefault();
-
-        let first = getCell(row, 1);
-        let small = row.querySelector(".muted").textContent;
-        let name = first.slice(0, first.length - small.length);
-
-        row.querySelector("td:nth-child(3)").innerHTML = '<span class="badge green">Approved</span>';
-        row.querySelector("a").innerHTML = "Reviewed";
-        alert(name + " is approved.");
+        rows[i].querySelectorAll("td")[2].innerHTML = '<span class="badge green">Approved</span>';
+        rows[i].querySelector("a").innerHTML = "Reviewed";
+        alert("The event is approved.");
     });
-});
+}
 
-document.getElementById("filterForm").addEventListener("submit", searchQueue);
+document.getElementById("filterForm").addEventListener("submit", filterTable);
 document.getElementById("q").addEventListener("input", filterTable);
 document.getElementById("status").addEventListener("change", filterTable);
 document.getElementById("sort").addEventListener("change", sortTable);
